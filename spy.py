@@ -6,16 +6,18 @@ from time import mktime, sleep
 import telethon.sync
 from threading import Thread
 
+from creds import Credentials
+
 try:
     from collections.abc import Sequence
 except ImportError:
     from collections import Sequence
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-API_HASH = 'your api hash'
-API_ID = 'your api id'
-BOT_TOKEN = "your bot token"
-USER_NAME = "your user name"
+API_HASH = Credentials.API_HASH
+API_ID = Credentials.API_ID
+BOT_TOKEN = Credentials.BOT_TOKEN
+USER_NAME = Credentials.USER_NAME
 
 client = TelegramClient('data_thief', API_ID, API_HASH)
 

@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta
-from sys import argv, exit
-from telethon import TelegramClient, events, connection
-from telethon.tl.types import UserStatusRecently, UserStatusEmpty, UserStatusOnline, UserStatusOffline, PeerUser, PeerChat, PeerChannel
+from datetime import datetime, timezone
 from time import mktime, sleep
-import telethon.sync
-from threading import Thread
+
+from telethon import TelegramClient, events
+from telethon.tl.types import UserStatusOnline, UserStatusOffline
 
 from creds import Credentials
 
@@ -19,7 +17,7 @@ API_ID = Credentials.API_ID
 BOT_TOKEN = Credentials.BOT_TOKEN
 USER_NAME = Credentials.USER_NAME
 
-client = TelegramClient('data_thief', API_ID, API_HASH)
+client = TelegramClient('status_monitor', API_ID, API_HASH)
 
 client.connect()
 client.start()
@@ -145,35 +143,35 @@ async def start(event):
         if isinstance(account.status, UserStatusOnline):
             if contact.online != True:
                 contact.online = True
-                contact.last_offline = datetime.now()
+                contact.last_offline = datetime.now(timezone.utc)
                 was_offline='unknown offline time'
                 if contact.last_online is not None:
-                    was_offline = (contact.last_offline - contact.last_online).strftime(DATETIME_FORMAT)
-                await event.respond(f'{get_interval(was_offline)}: {contact.name} went online.')
+                    was_offline = str(contact.last_offline - contact.last_online).split('.', 2)[0]
+                await event.respond(f'{was_offline}: **{contact.name}** went online.')
         elif isinstance(account.status, UserStatusOffline):
             if contact.online == True:
                 contact.online = False
                 last_time_online = utc2localtime(account.status.was_online)
                 if (last_time_online is None):
-                    last_time_online = datetime.now()
+                    last_time_online = datetime.now(timezone.utc)
                 contact.last_online = account.status.was_online
 
                 was_online='unknown online time'
                 if contact.last_offline is not None:
-                    was_online = (contact.last_online - contact.last_offline).strftime(DATETIME_FORMAT)
+                    was_online = str(contact.last_online - contact.last_offline).split('.', 2)[0]
 
-                await event.respond(f'{get_interval(was_online)} {contact.name} went offline.')
+                await event.respond(f'{was_online} **{contact.name}** went offline.')
             contact.last_offline = None
         else:
             if contact.online == True:
                 contact.online = False
-                contact.last_online = datetime.now()
+                contact.last_online = datetime.now(timezone.utc)
 
                 was_online='unknown online time'
                 if contact.last_offline is not None:
-                    was_online = (contact.last_online - contact.las_offline).strftime(DATETIME_FORMAT)
+                    was_online = str(contact.last_online - contact.las_offline).split('.', 2)[0]
 
-                await event.respond(f'{get_interval(was_online)}: {contact.name} went offline.')
+                await event.respond(f'{was_online}: **{contact.name}** went offline.')
                 contact.last_offline = None
         delay = 5
         if('delay' in user_data):
@@ -290,14 +288,6 @@ def printToFile(str):
     with open(file_name,'a') as f:
         print(str)
         f.write(str + '\n')
-
-def get_interval(date):
-    d = divmod(date.total_seconds(),86400)  # days
-    h = divmod(d[1],3600)  # hours
-    m = divmod(h[1],60)  # minutes
-    s = m[1]  # seconds
-
-    return '%dh:%dm:%ds' % (h[0],m[0],s)
 
 if __name__ == '__main__':
     main()

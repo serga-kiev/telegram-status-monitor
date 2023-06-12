@@ -1,11 +1,11 @@
-import os
+from decouple import config
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
 
 class Credentials:
-    BOT_TOKEN = os.getenv("BOT_TOKEN")  # from @botfather
-    API_ID = int(os.getenv("API_ID"))  # from https://my.telegram.org/apps
-    API_HASH = os.getenv("API_HASH")  # from https://my.telegram.org/apps
-    USER_NAME=os.getenv("USER_NAME")
+    API_ID: int = config("API_ID")
+    API_HASH: str = config("API_HASH")
+    BOT_TOKEN: str = config("BOT_TOKEN")
+    USER_NAME: str = config("USER_NAME")
